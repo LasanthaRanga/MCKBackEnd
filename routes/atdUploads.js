@@ -61,9 +61,9 @@ router.post('/getUploadList', (req, res, nex) => {
 
 
 router.get('/:path', (req, res, nex) => {
-    console.log("hit");
+//    console.log("hit");
     var path = req.params.path;
-    console.log(appRoot);
+  //  console.log(appRoot);
     res.sendFile(appRoot + '/uploads/' + path);
 });
 

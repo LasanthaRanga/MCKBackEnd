@@ -2,6 +2,8 @@ const mycon = require('../util/conn');
 const jwt = require('jsonwebtoken');
 
 exports.getAllusers = (req, res, next) => {
+    console.log(req.header);
+
     try {
         mycon.execute("select * from user",
             (error, rows, fildData) => {
@@ -29,6 +31,7 @@ exports.login = (req, res, next) => {
                         console.log(rows[0]);
                         if (rows[0].user_password == req.body.pword) {
                             console.log('equal');
+
                             let obj = {
                                 uid: rows[0].idUser,
                                 fname: rows[0].user_full_name,

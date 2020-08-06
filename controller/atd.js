@@ -5,6 +5,7 @@ const conn = require('../util/conn');
 
 
 exports.startAtdMain = (req, res, next) => {
+    var day = dateFormat(new Date(), "yyyy-mm-dd h:MM:ss");
     try {
         mycon.execute("INSERT INTO `atd_main`( `status`, `status_text`, `other_text`, `other_int`) " +
             "VALUES ( 0, 'Start', NULL, NULL)",
@@ -14,17 +15,17 @@ exports.startAtdMain = (req, res, next) => {
                     let array = req.body.array;
                     array.forEach(as => {
                         let assid = as.idAssessment;
-                        mycon.execute("INSERT INTO `atd` (`idAssessment`, `atd_status`, `atd_status_int`, `main_id`) " +
-                            " VALUES ( '" + assid + "', 'Start', 0, '" + main + "');", (e, r, f) => {
+                        mycon.execute("INSERT INTO `atd` (`idAssessment`, `atd_status`, `atd_status_int`, `main_id`,`start_date_time`) " +
+                            " VALUES ( '" + assid + "', 'Start', 0, '" + main + "', '" + day + "');", (e, r, f) => {
                                 if (!e) {
                                     console.log(r);
-                                }else{
+                                } else {
                                     console.log(e);
                                 }
                             });
                     });
-                    res.send({idatdmain: main});
-                }else{
+                    res.send({ idatdmain: main });
+                } else {
                     console.log(error);
                 }
             });
@@ -35,9 +36,45 @@ exports.startAtdMain = (req, res, next) => {
 }
 
 
+exports.addAtdCustomer = (req, res, next) => {
+    try {
+        req.body.customer.forEach(cus => {
+            console.log(cus);
+            mycon.execute("INSERT INTO `atd_customer` (  `nic`, `fullname`, `initname`, `adl1`, `adl2`, `adl3`, `mobile`, `tp`, `fullnamesinhala`, `initnamesinhala`, `main_id`) " +
+                "  VALUES ( '" + cus.nic + "', '" + cus.fname + "', '" + cus.iname + "', '" + cus.adl1 + "', '" + cus.adl2 + "', '" + cus.adl3 + "', '" + cus.mobile + "', '" + cus.tp + "', '" + cus.sfname + "', '" + cus.siname + "', '" + req.body.atdmainid + "' )", (err, row, next) => {
+                    if (!err) {
+                    } else {
+                        console.log(err);
+                    }
+                });
+        }
+        );
+        res.send({ idatdmain: atdmainid })
 
 
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
 
+
+exports.getAtdsBymainId = (req, res, next) => {
+    try {
+        mycon.execute("SELECT atd.idAtd,atd.idAssessment,atd.oppu_no,atd.pathtiru_no,atd.oppu_nature,atd.notharis_name,atd.pimbura_no,atd.minindoru_name,atd.land_acres,atd.land_rudd,atd.land_parch,atd.land_lotno,atd.land_value,atd.handover_date,atd.land_description,atd.land_description_text,atd.atd_status,atd.atd_status_int,atd.start_date_time,atd.user_id1,atd.harforfull,atd.arlyrequested,atd.user_idri,atd.ri_date,atd.des,atd.main_id,atd_main.idatdmain,atd_main.`status`,atd_main.status_text,atd_main.other_text,atd_main.other_int,assessment.assessment_no,ward.ward_name,street.street_name,ass_nature.ass_nature_name,ass_discription.ass_discription FROM atd_main INNER JOIN atd ON atd.main_id=atd_main.idatdmain INNER JOIN assessment ON assessment.idAssessment=atd.idAssessment INNER JOIN ward ON assessment.Ward_idWard=ward.idWard INNER JOIN street ON street.Ward_idWard=ward.idWard AND assessment.Street_idStreet=street.idStreet INNER JOIN ass_nature ON assessment.ass_nature_idass_nature=ass_nature.idass_nature INNER JOIN ass_discription ON assessment.ass_discription_idass_discription=ass_discription.idass_discription WHERE atd_main.idatdmain =" + req.body.atdmainid,
+            (err, row, next) => {
+                if (!err) {
+                    res.send(row);
+                } else {
+                    console.log(err);
+                }
+            });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
 
 
 
@@ -151,15 +188,15 @@ exports.saveData = (req, res, next) => {
     }
 }
 
+
 exports.getAtdList = (req, res, next) => {
     try {
-        mycon.execute("SELECT atd_customer.initname,ward.ward_name,street.street_name,assessment.assessment_no,atd.idAtd,atd.atd_status_int " +
-            " FROM atd LEFT JOIN atd_customer ON atd_customer.idAtd=atd.idAtd " +
-            " LEFT JOIN assessment ON assessment.idAssessment=atd.idAssessment " +
-            " LEFT JOIN ward ON assessment.Ward_idWard=ward.idWard " +
-            " LEFT JOIN street ON street.Ward_idWard=ward.idWard " +
-            " AND assessment.Street_idStreet=street.idStreet " +
-            " WHERE atd.atd_status_int= '" + req.body.status + "' GROUP BY atd.idAtd", (error, rows, fildData) => {
+        mycon.execute("SELECT ward.ward_name,street.street_name,assessment.assessment_no,atd.idAtd,atd.atd_status_int," +
+            " atd_customer.initname,atd_main.idatdmain FROM atd LEFT JOIN assessment ON assessment.idAssessment=atd.idAssessment " +
+            " LEFT JOIN ward ON assessment.Ward_idWard=ward.idWard LEFT JOIN street ON street.Ward_idWard=ward.idWard AND " +
+            " assessment.Street_idStreet=street.idStreet INNER JOIN atd_main ON atd_main.idatdmain=atd.main_id INNER JOIN atd_customer " +
+            " ON atd_customer.main_id=atd_main.idatdmain WHERE atd.atd_status_int = '" + req.body.status + "' GROUP BY atd_main.idatdmain "
+            , (error, rows, fildData) => {
                 if (!error) {
                     res.send(rows);
                 } else {
@@ -173,12 +210,36 @@ exports.getAtdList = (req, res, next) => {
     }
 }
 
+
+
 exports.getAtd = (req, res, next) => {
     try {
         mycon.execute("SELECT atd.idAtd,atd.idAssessment,atd.oppu_no,atd.pathtiru_no,atd.oppu_nature,atd.notharis_name, " +
             "  atd.pimbura_no,atd.minindoru_name,atd.land_acres,atd.land_rudd,atd.land_parch,atd.land_lotno,atd.land_value, " +
             "  atd.handover_date,atd.land_description,atd.land_description_text,atd.atd_status,atd.atd_status_int,atd.start_date_time, " +
-            "   atd.user_id1,atd.harforfull,atd.arlyrequested,atd.user_idri,atd.ri_date,atd.des FROM atd WHERE idatd = " + req.body.atdid, (error, rows, fildData) => {
+            "   atd.user_id1,atd.harforfull,atd.arlyrequested,atd.user_idri,atd.ri_date,atd.des,atd.main_id FROM atd WHERE idatd = " + req.body.atdid, (error, rows, fildData) => {
+                if (!error) {
+                    res.send(rows);
+                } else {
+                    console.log(error);
+                    res.status(500).send(error);
+                }
+            });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
+
+exports.getAtds = (req, res, next) => {
+    try {
+        mycon.execute("SELECT atd.idAtd,atd.idAssessment,atd.oppu_no,atd.pathtiru_no,atd.oppu_nature,atd.notharis_name," +
+            " atd.pimbura_no,atd.minindoru_name,atd.land_acres,atd.land_rudd,atd.land_parch,atd.land_lotno,atd.land_value," +
+            " atd.handover_date,atd.land_description,atd.land_description_text,atd.atd_status,atd.atd_status_int," +
+            " atd.start_date_time,atd.user_id1,atd.harforfull,atd.arlyrequested,atd.user_idri,atd.ri_date,atd.des,atd.main_id," +
+            " atd_main.idatdmain,atd_main.`status`,atd_main.status_text,atd_main.other_text,atd_main.other_int FROM atd_main " +
+            " INNER JOIN atd ON atd.main_id=atd_main.idatdmain WHERE atd.main_id = " + req.body.idatdmain, (error, rows, fildData) => {
                 if (!error) {
                     res.send(rows);
                 } else {
@@ -195,9 +256,9 @@ exports.getAtd = (req, res, next) => {
 
 exports.getAtdCustomer = (req, res, next) => {
     try {
-        mycon.execute("SELECT atd_customer.idAtdCus,atd_customer.nic,atd_customer.fullname,atd_customer.initname," +
-            " atd_customer.adl1,atd_customer.adl2,atd_customer.adl3,atd_customer.mobile,atd_customer.tp,atd_customer.fullnamesinhala," +
-            " atd_customer.initnamesinhala,atd_customer.idAtd FROM atd_customer WHERE atd_customer.idAtd= " + req.body.atdid, (error, rows, fildData) => {
+        mycon.execute("SELECT atd_customer.idAtdCus,atd_customer.nic,atd_customer.fullname,atd_customer.initname,atd_customer.adl1," +
+            " atd_customer.adl2,atd_customer.adl3,atd_customer.mobile,atd_customer.tp,atd_customer.fullnamesinhala," +
+            " atd_customer.initnamesinhala,atd_customer.main_id FROM atd_customer WHERE atd_customer.main_id= " + req.body.idatdmain, (error, rows, fildData) => {
                 if (!error) {
                     res.send(rows);
                 } else {
@@ -243,13 +304,18 @@ exports.setApprove = (req, res, next) => {
     console.log(req.body);
     var day = dateFormat(new Date(), "yyyy-mm-dd h:MM:ss");
     try {
-        mycon.execute("INSERT INTO  `atd_approve`( `atdid`, `comment`, `status_int`, `status_string`, `user_id`, `dt`) " +
-            "  VALUES ( " + req.body.atdid + ", '" + req.body.comment + "', '" + req.body.statusInt + "', '" + req.body.statusString + "', '" + req.body.uid + "', '" + day + "')", (error, rows, fildData) => {
+        mycon.execute("UPDATE `atd_main` SET `status`='" + req.body.st + "',`status_text`='" + req.body.status + "' WHERE `idatdmain`=" + req.body.idatdmain, (er, rw, fd) => {
+            if (er) {
+                console.log(er);
+            }
+        });
+        mycon.execute("INSERT INTO  `atd_approve`(  `comment`, `status_int`, `status_string`, `user_id`, `dt`, main_id) " +
+            "  VALUES (  '" + req.body.comment + "', '" + req.body.statusInt + "', '" + req.body.statusString + "', '" + req.body.uid + "', '" + day + "','" + req.body.idatdmain + "')", (error, rows, fildData) => {
                 if (!error) {
-                    mycon.execute("UPDATE `atd` SET `atd_status`='" + req.body.status + "',`atd_status_int`= '" + req.body.st + "' WHERE `idAtd`= " + req.body.atdid, (er, ro, fi) => {
+                    mycon.execute("UPDATE `atd` SET `atd_status`='" + req.body.status + "',`atd_status_int`= '" + req.body.st + "' WHERE `main_id`= " + req.body.idatdmain, (er, ro, fi) => {
                         if (!er) {
-                            console.log(ro);
-                            res.send(rows);
+                            //console.log(ro);
+                            res.send({ok: 'ok'});
                         } else {
                             console.log(error);
                         }
@@ -332,12 +398,11 @@ exports.getNearestAss = (req, res, next) => {
 
 exports.getApproval = (req, res, next) => {
     try {
-        mycon.execute(" SELECT atd_approve.`comment`,`user`.user_full_name,approval_cat.approval_name,atd_approve.dt,atd.idAtd, " +
-            " atd_approve.idApprove, atd_approve.status_string, atd_approve.status_int, atd_approve.user_id FROM atd_approve INNER JOIN atd ON atd.idAtd=atd_approve.atdid  " +
-            "   INNER JOIN `user` ON `user`.idUser=atd_approve.user_id  " +
-            "  INNER JOIN user_has_approval_cat ON user_has_approval_cat.User_idUser=`user`.idUser  " +
-            "   INNER JOIN approval_cat ON user_has_approval_cat.Approval_cat_idApproval_cat=approval_cat.idApproval_cat " +
-            "  WHERE atd.idAtd= '" + req.body.atdid + "' ORDER BY atd_approve.idApprove ASC "
+        mycon.execute("SELECT atd_approve.`comment`,`user`.user_full_name,approval_cat.approval_name,atd_approve.dt,atd.idAtd,atd_approve.idApprove, " +
+            "  atd_approve.status_string,atd_approve.status_int,atd_approve.user_id,atd_approve.main_id FROM atd_approve INNER JOIN atd ON atd_approve.main_id=atd.main_id " +
+            "  INNER JOIN `user` ON `user`.idUser=atd_approve.user_id INNER JOIN user_has_approval_cat ON user_has_approval_cat.User_idUser=`user`.idUser " +
+            "  INNER JOIN approval_cat ON user_has_approval_cat.Approval_cat_idApproval_cat=approval_cat.idApproval_cat WHERE atd_approve.main_id = '" + req.body.idatdmain + "' GROUP BY atd_approve.idApprove " +
+            "  ORDER BY atd_approve.idApprove ASC"
             , (error, rows, fildData) => {
                 if (!error) {
                     res.send(rows);

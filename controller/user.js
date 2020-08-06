@@ -44,7 +44,7 @@ exports.login = (req, res, next) => {
                                 appCatName: rows[0].approval_name
                             };
 
-                            const token = jwt.sign(obj, process.env.JWT_KEY, { expiresIn: "1h" });
+                            const token = jwt.sign(obj, "secret", { expiresIn: "1h" });
                             return res.status(200).json({
                                 message: "Auth Successfull",
                                 token: token

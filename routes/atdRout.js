@@ -20,5 +20,8 @@ router.post("/getSide", atd.getSide);
 router.post("/getNearestAss", atd.getNearestAss);
 router.post("/getApproval", atd.getApproval);
 router.post("/getStatus", atd.getStatus);
+router.post("/getLaterStaticsData", atd.getLaterStaticsData);
+router.post("/setValuation", atd.setValuation);
+router.post("/updateSystem", atd.updateSystem);
 
 module.exports = router;

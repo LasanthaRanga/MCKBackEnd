@@ -315,7 +315,7 @@ exports.setApprove = (req, res, next) => {
                     mycon.execute("UPDATE `atd` SET `atd_status`='" + req.body.status + "',`atd_status_int`= '" + req.body.st + "' WHERE `main_id`= " + req.body.idatdmain, (er, ro, fi) => {
                         if (!er) {
                             //console.log(ro);
-                            res.send({ok: 'ok'});
+                            res.send({ ok: 'ok' });
                         } else {
                             console.log(error);
                         }
@@ -400,8 +400,8 @@ exports.getApproval = (req, res, next) => {
     try {
         mycon.execute("SELECT atd_approve.`comment`,`user`.user_full_name,approval_cat.approval_name,atd_approve.dt,atd.idAtd,atd_approve.idApprove, " +
             "  atd_approve.status_string,atd_approve.status_int,atd_approve.user_id,atd_approve.main_id FROM atd_approve INNER JOIN atd ON atd_approve.main_id=atd.main_id " +
-            "  INNER JOIN `user` ON `user`.idUser=atd_approve.user_id INNER JOIN user_has_approval_cat ON user_has_approval_cat.User_idUser=`user`.idUser " +
-            "  INNER JOIN approval_cat ON user_has_approval_cat.Approval_cat_idApproval_cat=approval_cat.idApproval_cat WHERE atd_approve.main_id = '" + req.body.idatdmain + "' GROUP BY atd_approve.idApprove " +
+            "  LEFT JOIN `user` ON `user`.idUser=atd_approve.user_id LEFT JOIN user_has_approval_cat ON user_has_approval_cat.User_idUser=`user`.idUser " +
+            "  LEFT JOIN approval_cat ON user_has_approval_cat.Approval_cat_idApproval_cat=approval_cat.idApproval_cat WHERE atd_approve.main_id = '" + req.body.idatdmain + "' GROUP BY atd_approve.idApprove " +
             "  ORDER BY atd_approve.idApprove ASC"
             , (error, rows, fildData) => {
                 if (!error) {
@@ -433,4 +433,136 @@ exports.getStatus = (req, res, next) => {
         res.status(500).send(error);
     }
 }
+
+exports.getLaterStaticsData = (req, res, next) => {
+    array = [];
+    try {
+        mycon.execute("SELECT atd_later.id,atd_later.`value` FROM atd_later WHERE atd_later.later_type=" + req.body.type
+            , (error, rows, fildData) => {
+                if (!error) {
+                    res.send(rows);
+                } else {
+                    console.log(error);
+                    res.status(500).send(error);
+                }
+            });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
+exports.setValuation = (req, res, next) => {
+    try {
+
+        mycon.execute("UPDATE `atd_main` SET `status`='" + req.body.statusInt + "',`status_text`='" + req.body.statusString + "' WHERE `idatdmain`=" + req.body.idatdmain, (er, rw, fd) => {
+            if (er) {
+                console.log(er);
+            }
+        });
+
+        mycon.execute("INSERT INTO  `atd_approve`(  `comment`, `status_int`, `status_string`, `user_id`, `dt`, main_id) " +
+            "  VALUES (  '" + req.body.comment + "', '1', '" + req.body.statusString + "', '" + req.body.uid + "', '" + req.body.date + "','" + req.body.idatdmain + "')", (error, rows, fildData) => {
+                if (!error) {
+
+                } else {
+                    console.log(error);
+                    res.status(500).send(error);
+                }
+            });
+
+        mycon.execute("UPDATE `atd` SET `atd_status`='" + req.body.statusString + "',`atd_status_int`='" + req.body.statusInt + "',`valuation_no`='" + req.body.number + "',`valuation_date`='" + req.body.date + "' WHERE `idAtd`=" + req.body.idAtd
+            , (error, rows, fildData) => {
+                if (!error) {
+
+                } else {
+                    console.log(error);
+                    res.status(500).send(error);
+                }
+            });
+
+        res.send({ ok: 'OK Done' });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
+
+
+exports.updateSystem = (req, res, next) => {
+    let mid = req.body.mainId;
+    var day = dateFormat(new Date(), "yyyy-mm-dd");
+    console.log("updating");
+    try {
+        mycon.execute("SELECT atd.idAssessment,atd.idAtd FROM atd_main INNER JOIN atd ON atd.main_id=atd_main.idatdmain WHERE atd.main_id= " + mid
+            , (error, rows, fildData) => {
+                console.log("atds");
+                if (!error) {
+                    rows.forEach(atd => {
+                        let idAss = atd.idAssessment;
+                        console.log("atd" + idAss);
+                        mycon.execute("UPDATE  `cushasassess` SET `status` = 0 WHERE `assessment_id` = " + idAss, (ee, rr, ff) => {
+                            console.log("Updated" + idAss);
+                            if (ee) {
+                               
+                                console.log(error);
+                                res.status(500).send(error);
+                            }
+                        });
+                        mycon.execute("SELECT atd_customer.idAtdCus,atd_customer.nic,atd_customer.fullname,atd_customer.initname,atd_customer.adl1,atd_customer.adl2,atd_customer.adl3,atd_customer.mobile,atd_customer.tp,atd_customer.fullnamesinhala,atd_customer.initnamesinhala,atd_customer.main_id FROM atd_main INNER JOIN atd_customer ON atd_customer.main_id=atd_main.idatdmain WHERE atd_customer.main_id=" + mid
+                            , (erro, row, fildDat) => {
+                                console.log("customers");
+                                if (!erro) {
+                                    row.forEach(cus => {
+                                        mycon.execute(
+                                            "INSERT INTO `customer` (`cus_name`,`cus_person_title`,`cus_nic`,`cus_mobile`,`cus_tel`,\n" +
+                                            "`cus_address_l1`,`cus_address_l2`,`cus_address_l3`,\n" +
+                                            "`cus_sity`,`cus_status`,`cus_syn`,`cus_reg_date`,`cus_update_date`,\n" +
+                                            "`cus_name_sinhala`,`cus_address_l1_sinhala`,`cus_address_l2_sinhala`,`cus_address_l3_sinhala`,`cus_cat_id`) \n" +
+                                            "VALUES ('" + cus.initname + "',NULL,'" + cus.nic + "','" + cus.mobile + "','" + cus.tp + "',\n" +
+                                            "'" + cus.adl1 + "','" + cus.adl2 + "','" + cus.adl3 + "',\n" +
+                                            "'',1,0,'" + day + "','" + day + "',\n" +
+                                            "'" + cus.initnamesinhala + "','','','',NULL)"
+                                            , (er, ro, fi) => {
+                                                if (!er) {
+                                                    let cusid = ro.insertId;
+                                                    console.log("cusids" + cusid);
+                                                    mycon.execute("INSERT INTO `cushasassess`( `assessment_id`, `customer_id`, `status`, `date`) " +
+                                                        "VALUES ( '" + idAss + "', '" + cusid + "', 1, '" + day + "')", (ee, rr, ff) => {
+                                                            if (!ee) {
+                                                                console.log("cus has ass" + cusid);
+                                                            } else {
+                                                                console.log(error);
+                                                                res.status(500).send(error);
+                                                            }
+                                                        });
+                                                } else {
+                                                    console.log(error);
+                                                    res.status(500).send(error);
+                                                }
+                                            });
+                                    });
+                                } else {
+                                    console.log(error);
+                                    res.status(500).send(error);
+                                }
+                            });
+                    });
+                } else {
+                    console.log(error);
+                    res.status(500).send(error);
+                }
+            });
+
+
+        res.send({ OK: "OK" });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
 

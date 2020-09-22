@@ -35,7 +35,7 @@ const userRouter = require('./routes/users');
 const assessRouter = require('./routes/assess');
 const atdRouter = require('./routes/atdRout');
 const atdUploadsRouter = require('./routes/atdUploads');
-
+const mobilePayRoute = require('./routes/mobilePayRoute');
 
 
 app.use(cors());
@@ -48,6 +48,7 @@ app.use('/user', userRouter);
 app.use('/ass', assessRouter);
 app.use('/atd', atdRouter);
 app.use('/atdUpload', atdUploadsRouter);
+app.use('/mobPay', mobilePayRoute);
 
 
 app.use((req, res, next) => {

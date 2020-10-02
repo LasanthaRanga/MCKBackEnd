@@ -37,7 +37,7 @@ const atdRouter = require('./routes/atdRout');
 const atdUploadsRouter = require('./routes/atdUploads');
 const mobilePayRoute = require('./routes/mobilePayRoute');
 const mobileKeyVal = require('./routes/mobileKeyVal');
-
+const shopRent = require('./routes/shopRent');
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -51,6 +51,7 @@ app.use('/atd', atdRouter);
 app.use('/atdUpload', atdUploadsRouter);
 app.use('/mobPay', mobilePayRoute);
 app.use('/mobKeyVal', mobileKeyVal);
+app.use('/shopRent', shopRent);
 
 
 app.use((req, res, next) => {

@@ -10,6 +10,7 @@ router.post("/getMyBill", mobilePay.getMyBill);
 router.post("/getAssBill", mobilePay.getAssBill);
 router.post("/getAssBillToTot", mobilePay.getAssBillToTot);
 router.post("/cancleAssBill", mobilePay.cancleAssBill);
+router.post("/getReciptData", mobilePay.getReciptData);
 
 
 module.exports = router;

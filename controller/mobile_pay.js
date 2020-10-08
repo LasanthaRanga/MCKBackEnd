@@ -22,7 +22,7 @@ exports.getPayment = (req, res, next) => {
                 }
                 mycon.execute("SELECT mobile_recipt_create.recipt_text FROM mobile_recipt_create WHERE mobile_recipt_create.app_cat='" + mob.app_cat + "'", (er, ro, ne) => {
                     if (!er) {
-                        text = ro[0].recipt_text;
+                        text = ro[0].recipt_text+mob.user_id+' :';
                         text += oder;
                         mycon.execute("INSERT INTO `mobile_pay` (`app_cat`,`app_id`,`user_id`,`collect_time`,`amount`,`pay_type`,`cheque_no`,`bank_id`,`mobile_recipt_no`,`oder`,`cus_email`,`cus_mobile`,`status`,`status_time`) " +
                             " VALUES ('" + mob.app_cat + "','" + mob.app_id + "','" + mob.user_id + "','" + day + "','" + mob.amount + "','" + mob.pay_type + "','" + mob.cheque_no + "','" + mob.bank_id + "','" + text + "','" + oder + "','" + mob.cus_email + "','" + mob.cus_mobile + "',0,'" + day + "');",
@@ -43,6 +43,24 @@ exports.getPayment = (req, res, next) => {
         res.status(500).send(error);
     }
 }
+
+
+exports.getReciptData = (req, res, next) => {
+    var id = req.body.id;
+    try {
+        mycon.execute("SELECT `user`.user_username,assessment.assessment_no,mobile_pay.idMobilePay,mobile_pay.app_cat,mobile_pay.app_id,mobile_pay.user_id,mobile_pay.collect_time,mobile_pay.amount,mobile_pay.pay_type,mobile_pay.cheque_no,mobile_pay.bank_id,mobile_pay.oder,mobile_pay.mobile_recipt_no,mobile_pay.cus_id,mobile_pay.cus_email,mobile_pay.cus_mobile,mobile_pay.`status`,mobile_pay.status_time,mobile_pay.recipt_id,mobile_pay.recipt_no,customer.cus_name FROM mobile_pay INNER JOIN `user` ON mobile_pay.user_id=`user`.idUser INNER JOIN assessment ON assessment.idAssessment=mobile_pay.app_id INNER JOIN customer ON assessment.Customer_idCustomer=customer.idCustomer WHERE mobile_pay.idMobilePay=" + id,
+            (ee, rr, ff) => {
+                if (!ee) {
+                    res.send(rr);
+                }
+            });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
 
 exports.getBank = (req, res, next) => {
     try {

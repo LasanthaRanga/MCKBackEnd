@@ -38,7 +38,6 @@ exports.makeAssess = (req, res, next) => {
                                         var qqq = "UPDATE `mobile_pay` SET `status`=1,`mob_tot_id`='" + insertId + "' WHERE `idMobilePay`= " + b.idMobilePay;
                                         mycon.execute(qqq, (eeee, rrrr, ffff) => {
                                             if (!eeee) {
-
                                             } else {
                                                 console.log(eeee);
                                             }

@@ -114,7 +114,7 @@ exports.getWardList = (req, res, next) => {
                 res.send(rows);
             } else {
                 console.log(error);
-                res.status(500).send(error);
+               // res.status(500).send(error);
             }
         });
     } catch (error) {
@@ -130,7 +130,7 @@ exports.getStreetList = (req, res, next) => {
                 res.send(rows);
             } else {
                 console.log(error);
-                res.status(500).send(error);
+               // res.status(500).send(error);
             }
         });
     } catch (error) {
@@ -152,7 +152,7 @@ exports.searchAssessment = (req, res, next) => {
                     res.send(rows);
                 } else {
                     console.log(error);
-                    res.status(500).send(error);
+                 //   res.status(500).send(error);
                 }
             });
     } catch (error) {
@@ -170,7 +170,7 @@ exports.xxxx = (req, res, next) => {
                 res.send(rows);
             } else {
                 console.log(error);
-                res.status(500).send(error);
+               // res.status(500).send(error);
             }
         });
     } catch (error) {

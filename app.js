@@ -47,15 +47,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 
-app.use('/user', userRouter);
-app.use('/ass', assessRouter);
-app.use('/atd', atdRouter);
-app.use('/atdUpload', atdUploadsRouter);
-app.use('/mobPay', mobilePayRoute);
-app.use('/mobKeyVal', mobileKeyVal);
-app.use('/shopRent', shopRent);
-app.use('/mobprint', mobilePrinter);
-app.use('/mobPayTot', mobilePayTotRoute);
+app.use('/mobile/user', userRouter);
+app.use('/mobile/ass', assessRouter);
+app.use('/mobile/atd', atdRouter);
+app.use('/mobile/atdUpload', atdUploadsRouter);
+app.use('/mobile/mobPay', mobilePayRoute);
+app.use('/mobile/mobKeyVal', mobileKeyVal);
+app.use('/mobile/shopRent', shopRent);
+app.use('/mobile/mobprint', mobilePrinter);
+app.use('/mobile/mobPayTot', mobilePayTotRoute);
 
 
 app.use((req, res, next) => {

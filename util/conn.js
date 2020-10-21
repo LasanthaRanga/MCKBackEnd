@@ -6,9 +6,9 @@ const pool = mysql.createPool({
     // password: process.env.password,
     // database: process.env.database
 
-    host: '124.43.9.57',
+    host: 'localhost',
     user: 'root',
-    password: '@Mck_#321',
+    password: 'Arac@%4576y$',
     database: 'atd2'
 
     // host: 'localhost',

@@ -31,6 +31,7 @@ const corsOptions = {
 // Enable preflight requests for all routes
 app.options('*', cors(corsOptions));
 
+const index =  require('./routes/index');
 const userRouter = require('./routes/users');
 const assessRouter = require('./routes/assess');
 const atdRouter = require('./routes/atdRout');
@@ -47,6 +48,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 
+app.use('/mobile/index', index);
 app.use('/mobile/user', userRouter);
 app.use('/mobile/ass', assessRouter);
 app.use('/mobile/atd', atdRouter);
